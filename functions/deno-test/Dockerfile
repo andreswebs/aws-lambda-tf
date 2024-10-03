@@ -7,24 +7,6 @@ FROM debian:bookworm-slim AS runtime
 ARG TARGETOS="linux"
 ARG TARGETARCH="arm64"
 
-RUN \
-    apt-get update && \
-    apt-get install --yes --quiet curl unzip && \
-    if [ "${TARGETARCH}" = "amd64" ]; then export AWS_ARCH="x86_64" ; fi && \
-    if [ "${TARGETARCH}" = "arm64" ]; then export AWS_ARCH="aarch64" ; fi && \
-    curl \
-        --fail \
-        --silent \
-        --location \
-        --output "awscliv2.zip" \
-        "https://awscli.amazonaws.com/awscli-exe-${TARGETOS}-${AWS_ARCH}.zip" && \
-    unzip -qq awscliv2.zip && \
-    ./aws/install && \
-    rm -rf ./aws/install awscliv2.zip && \
-    apt-get purge --yes --quiet curl unzip && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 COPY --from=aws-lambda-adapter /lambda-adapter /opt/extensions/lambda-adapter
 COPY --from=deno /deno /usr/local/bin/deno
 
