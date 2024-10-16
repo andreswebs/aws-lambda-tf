@@ -23,20 +23,26 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
 
-RUN \
+RUN <<EOT
     cargo chef cook \
         --release \
         --zigbuild \
         --recipe-path recipe.json \
         --target x86_64-unknown-linux-musl \
         --target aarch64-unknown-linux-musl
+EOT
 
 COPY . .
-RUN cargo zigbuild -r \
-    --target x86_64-unknown-linux-musl --target aarch64-unknown-linux-musl && \
-    mkdir /app/linux && \
-    cp target/aarch64-unknown-linux-musl/release/prog /app/linux/arm64 && \
+
+RUN <<EOT
+    cargo zigbuild -r \
+        --target x86_64-unknown-linux-musl \
+        --target aarch64-unknown-linux-musl
+
+    mkdir /app/linux
+    cp target/aarch64-unknown-linux-musl/release/prog /app/linux/arm64
     cp target/x86_64-unknown-linux-musl/release/prog /app/linux/amd64
+EOT
 
 FROM public.ecr.aws/lambda/provided:al2023 AS runtime
 ARG TARGETPLATFORM
