@@ -12,3 +12,7 @@ output "lambda_log_group" {
   value       = module.lambda_base.log_group
   description = "The Lambda log group"
 }
+
+output "lambda_function_url" {
+  value = var.create_lambda_function_url ? module.lambda.lambda_function_url : ""
+}

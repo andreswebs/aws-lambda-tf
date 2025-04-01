@@ -9,10 +9,6 @@ locals {
   dns_suffix = data.aws_partition.current.dns_suffix
 }
 
-locals {
-  lambda_alias = "default"
-}
-
 module "lambda_base" {
   source  = "andreswebs/lambda-base/aws"
   version = "0.3.0"
@@ -49,19 +45,19 @@ module "lambda" {
   image_uri      = var.image_uri
 
   publish     = true
-  memory_size = 256
-  timeout     = 30
+  memory_size = var.memory_size_mb
+  timeout     = var.timeout_seconds
 
-  create_lambda_function_url = false
+  create_lambda_function_url = var.create_lambda_function_url
 
-  # environment_variables = var.lambda_env
+  environment_variables = var.lambda_env
 }
 
 module "alias" {
   depends_on       = [module.lambda]
   source           = "terraform-aws-modules/lambda/aws//modules/alias"
   refresh_alias    = true
-  name             = local.lambda_alias
+  name             = var.lambda_alias
   function_name    = module.lambda.lambda_function_name
   function_version = module.lambda.lambda_function_version
 }
