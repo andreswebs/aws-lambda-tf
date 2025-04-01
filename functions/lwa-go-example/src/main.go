@@ -71,6 +71,6 @@ func eventsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Info("event received", slog.Any("event", r.Body))
+	slog.Info("event received", slog.Any("event", event))
 	w.WriteHeader(http.StatusNoContent)
 }

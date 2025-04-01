@@ -15,11 +15,9 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt
 COPY --from=build /build/app /app
 
 ENV AWS_LWA_PORT="8080"
-ENV AWS_LWA_ENABLE_COMPRESSION="true"
-ENV AWS_LWA_PASS_THROUGH_PATH="/events"
+ENV AWS_LWA_READINESS_CHECK_PORT="8080"
 ENV AWS_LWA_READINESS_CHECK_PATH="/readyz"
-ENV AWS_LWA_READINESS_CHECK_PORT="${AWS_LWA_PORT}"
-
-EXPOSE "${AWS_LWA_PORT}"
+ENV AWS_LWA_PASS_THROUGH_PATH="/events"
+ENV AWS_LWA_ENABLE_COMPRESSION="true"
 
 ENTRYPOINT [ "/app" ]
