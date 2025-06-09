@@ -2,8 +2,8 @@
 set -o nounset
 set -o errexit
 
-LOCAL_PORT="${LOCAL_PORT:-9000}"
-IMAGE_PORT="${IMAGE_PORT:-8080}"
+LOCAL_PORT="${LOCAL_PORT:-7777}"
+IMAGE_PORT="${IMAGE_PORT:-7777}"
 
 docker run \
     --name local-lambda \

@@ -11,30 +11,98 @@ variable "description" {
 
 variable "image_uri" {
   type        = string
-  description = "Lambda ECR image URI"
+  description = "Image URI for the Lambda function"
 }
 
 variable "timeout_seconds" {
-  type    = number
-  default = 300
+  type        = number
+  description = "Amount of time the Lambda Function has to run in seconds"
+  default     = 300
 }
 
 variable "memory_size_mb" {
-  type    = number
-  default = 256
+  type        = number
+  description = "Amount of memory in MB assigned to the Lambda function"
+  default     = 256
 }
 
 variable "lambda_env" {
-  type    = map(string)
-  default = {}
+  type        = map(string)
+  description = "Map of environment variables names to values for the Lambda function"
+  default     = {}
 }
 
-variable "lambda_alias" {
+variable "publish" {
+  type        = bool
+  description = "Publish the lambda?"
+  default     = true
+}
+
+variable "alias" {
   type    = string
   default = "default"
 }
 
-variable "create_lambda_function_url" {
-  type    = bool
-  default = false
+variable "alias_description" {
+  type        = string
+  description = "Description of the alias"
+  default     = null
+}
+
+variable "architecture" {
+  type    = string
+  default = "arm64"
+}
+
+variable "cloudwatch_log_group" {
+  type    = string
+  default = null
+}
+
+variable "log_group_name" {
+  type = string
+}
+
+variable "iam_role_arn" {
+  type = string
+}
+
+variable "kms_key_arn" {
+  type    = string
+  default = null
+}
+
+variable "reserved_concurrent_executions" {
+  type        = number
+  description = "Amount of reserved concurrent executions for the lambda function. A value of 0 disables lambda from being triggered and -1 removes any concurrency limitations"
+  default     = -1
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  description = "(Optional) List of subnet IDs to use"
+  default     = []
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  description = "(Optional) List of security group IDs to use"
+  default     = []
+}
+
+variable "efs_access_point_arn" {
+  type        = string
+  description = "(Optional) ARN of EFS access point"
+  default     = null
+}
+
+variable "efs_local_mount_path" {
+  type        = string
+  description = "(Optional) Local mount path of the EFS filesystem. Must start with `/mnt/`"
+  default     = null
+
+  validation {
+    condition     = var.efs_local_mount_path == null || startswith(var.efs_local_mount_path, "/mnt/")
+    error_message = "`efs_local_mount_path` must start with `/mnt/` ."
+  }
 }

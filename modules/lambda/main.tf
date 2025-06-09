@@ -1,63 +1,55 @@
-data "aws_partition" "current" {}
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 locals {
-  partition  = data.aws_partition.current.partition
-  region     = data.aws_region.current.name
-  account_id = data.aws_caller_identity.current.account_id
-  dns_suffix = data.aws_partition.current.dns_suffix
+  has_filesystem       = var.efs_access_point_arn != null && var.efs_access_point_arn != "" && var.efs_local_mount_path != null && var.efs_local_mount_path != ""
+  efs_local_mount_path = var.efs_local_mount_path == "" ? null : var.efs_local_mount_path
 }
 
-module "lambda_base" {
-  source  = "andreswebs/lambda-base/aws"
-  version = "0.3.0"
-  name    = var.name
-}
-
-module "lambda" {
-  depends_on = [module.lambda_base]
-  source     = "terraform-aws-modules/lambda/aws"
-  version    = "~> 7.9"
-
-  architectures = ["arm64"]
-
+resource "aws_lambda_function" "this" {
+  package_type  = "Image"
   function_name = var.name
+  role          = var.iam_role_arn
   description   = var.description
+  image_uri     = var.image_uri
+  timeout       = var.timeout_seconds
+  memory_size   = var.memory_size_mb
 
-  create_role = false
-  lambda_role = module.lambda_base.iam_role.arn
+  architectures = [var.architecture]
 
-  attach_cloudwatch_logs_policy = false
-  attach_dead_letter_policy     = false
-  attach_network_policy         = false
-  attach_tracing_policy         = false
-  attach_async_event_policy     = false
+  kms_key_arn = var.kms_key_arn
 
-  use_existing_cloudwatch_log_group = true
-  logging_log_format                = "JSON"
-  logging_log_group                 = module.lambda_base.log_group.name
+  reserved_concurrent_executions = var.reserved_concurrent_executions
 
-  tracing_mode = "Active"
+  publish = true
 
-  create_package = false
-  package_type   = "Image"
-  image_uri      = var.image_uri
+  dynamic "file_system_config" {
+    for_each = local.has_filesystem ? [1] : []
+    content {
+      arn              = var.efs_access_point_arn
+      local_mount_path = local.efs_local_mount_path
+    }
+  }
 
-  publish     = true
-  memory_size = var.memory_size_mb
-  timeout     = var.timeout_seconds
+  vpc_config {
+    security_group_ids = var.security_group_ids
+    subnet_ids         = var.subnet_ids
+  }
 
-  create_lambda_function_url = var.create_lambda_function_url
+  tracing_config {
+    mode = "Active"
+  }
 
-  environment_variables = var.lambda_env
+  logging_config {
+    log_format = "JSON"
+    log_group  = var.log_group_name
+  }
+
+  environment {
+    variables = var.lambda_env
+  }
 }
 
-module "alias" {
-  depends_on       = [module.lambda]
-  source           = "terraform-aws-modules/lambda/aws//modules/alias"
-  refresh_alias    = true
-  name             = var.lambda_alias
-  function_name    = module.lambda.lambda_function_name
-  function_version = module.lambda.lambda_function_version
+resource "aws_lambda_alias" "this" {
+  name             = var.alias
+  description      = var.alias_description
+  function_name    = aws_lambda_function.this.function_name
+  function_version = aws_lambda_function.this.version
 }

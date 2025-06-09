@@ -20,23 +20,23 @@ var (
 	readinessPath string
 )
 
-type Event events.SQSEvent
 type envelope map[string]any
 
 func init() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 	slog.SetDefault(logger)
-
-	port = ReadEnvVarWithDefault(portEnvVar, "8080")
-	readinessPath = ReadEnvVarWithDefault(readinessPathEnvVar, "/readyz")
-	eventsPath = ReadEnvVarWithDefault(eventsPathEnvVar, "/events")
 }
 
 func main() {
+	port = ReadEnvVarWithDefault(portEnvVar, "8080")
+	readinessPath = ReadEnvVarWithDefault(readinessPathEnvVar, "/readyz")
+	eventsPath = ReadEnvVarWithDefault(eventsPathEnvVar, "/events")
+
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/", apigwEventsHandler)
 	mux.HandleFunc(readinessPath, readinessHandler)
-	mux.HandleFunc(eventsPath, eventsHandler)
+	mux.HandleFunc(eventsPath, sqsEventsHandler)
 
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
@@ -62,8 +62,21 @@ func readinessHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func eventsHandler(w http.ResponseWriter, r *http.Request) {
-	var event Event
+func sqsEventsHandler(w http.ResponseWriter, r *http.Request) {
+	var event events.SQSEvent
+
+	err := json.NewDecoder(r.Body).Decode(&event)
+	if err != nil {
+		ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	slog.Info("event received", slog.Any("event", event))
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func apigwEventsHandler(w http.ResponseWriter, r *http.Request) {
+	var event events.APIGatewayProxyRequest
 
 	err := json.NewDecoder(r.Body).Decode(&event)
 	if err != nil {

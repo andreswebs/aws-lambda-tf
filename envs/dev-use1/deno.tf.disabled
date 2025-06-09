@@ -1,0 +1,6 @@
+module "deno_test" {
+  source      = "../../modules/lambda-wrapper"
+  name        = "deno-test"
+  description = "Testing Deno on Lambda"
+  image_uri   = var.image_uri
+}
