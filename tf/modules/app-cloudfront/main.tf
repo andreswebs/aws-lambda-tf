@@ -29,5 +29,15 @@ module "lambda" {
 resource "aws_lambda_function_url" "this" {
   function_name      = module.lambda.function.function_name
   qualifier          = module.lambda.alias.name
-  authorization_type = "NONE"
+  authorization_type = "AWS_IAM" # this would be "NONE" if not using cloudfront
+}
+
+resource "aws_lambda_permission" "cloudfront" {
+  statement_id           = "AllowCloudFrontServicePrincipal"
+  function_url_auth_type = "AWS_IAM"
+  function_name          = module.lambda.function.function_name
+  qualifier              = module.lambda.alias.name
+  action                 = "lambda:InvokeFunctionUrl"
+  principal              = "cloudfront.${local.dns_suffix}"
+  source_arn             = aws_cloudfront_distribution.this.arn
 }
