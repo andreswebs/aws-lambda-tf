@@ -102,7 +102,7 @@ variable "efs_local_mount_path" {
   default     = null
 
   validation {
-    condition     = var.efs_local_mount_path == null || startswith(var.efs_local_mount_path, "/mnt/")
+    condition     = var.efs_local_mount_path == null || startswith(coalesce(var.efs_local_mount_path, "error"), "/mnt/")
     error_message = "`efs_local_mount_path` must start with `/mnt/` ."
   }
 }

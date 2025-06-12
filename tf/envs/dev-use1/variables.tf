@@ -1,3 +1,7 @@
+variable "name" {
+  type = string
+}
+
 variable "image_uri" {
   type = string
 }

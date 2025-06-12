@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM public.ecr.aws/lambda/provided:al2023 AS runtime
 
-COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
 COPY --from=build /build/app /app
 
 ENV AWS_LWA_PORT="7777"

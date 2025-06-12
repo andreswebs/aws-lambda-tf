@@ -54,8 +54,7 @@ func readinessHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]string{
 		"msg": "available",
 	}
-	err := WriteJSONResponse(w, http.StatusOK, data, nil)
-	if err != nil {
+	if err := WriteJSONResponse(w, http.StatusOK, data, nil); err != nil {
 		slog.Error("failed to write JSON response", slog.Any("err", err))
 		http.Error(w,
 			"The server encountered a problem and could not process your request", http.StatusInternalServerError)
@@ -65,8 +64,7 @@ func readinessHandler(w http.ResponseWriter, r *http.Request) {
 func sqsEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var event events.SQSEvent
 
-	err := json.NewDecoder(r.Body).Decode(&event)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		ErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -76,14 +74,18 @@ func sqsEventsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apigwEventsHandler(w http.ResponseWriter, r *http.Request) {
-	var event events.APIGatewayProxyRequest
+	var data json.RawMessage
 
-	err := json.NewDecoder(r.Body).Decode(&event)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		ErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	slog.Info("event received", slog.Any("event", event))
-	w.WriteHeader(http.StatusNoContent)
+	slog.Info("event received", slog.Any("data", data))
+
+	if err := WriteJSONResponse(w, http.StatusOK, data, nil); err != nil {
+		slog.Error("failed to write JSON response", slog.Any("err", err))
+		http.Error(w,
+			"The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
 }

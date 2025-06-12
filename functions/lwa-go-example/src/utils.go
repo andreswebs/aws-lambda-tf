@@ -41,7 +41,7 @@ Taken from:
 
 Edwards, Alex. 2021. Let's Go Further! Advanced patterns for building, managing and deploying RESTful JSON APIs and web applications in Go (1st ed.)
 */
-func WriteJSONResponse(w http.ResponseWriter, status int, data interface{}, headers http.Header) (err error) {
+func WriteJSONResponse(w http.ResponseWriter, status int, data any, headers http.Header) (err error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return
