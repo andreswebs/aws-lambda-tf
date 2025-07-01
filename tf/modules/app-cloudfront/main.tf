@@ -16,7 +16,9 @@ module "lambda_base" {
 }
 
 module "lambda" {
-  source    = "../lambda"
+  source  = "andreswebs/lambda/aws"
+  version = "0.0.1"
+
   name      = var.name
   image_uri = var.image_uri
 
