@@ -4,20 +4,20 @@ data "aws_region" "current" {}
 
 locals {
   partition  = data.aws_partition.current.partition
-  region     = data.aws_region.current.name
+  region     = data.aws_region.current.region
   account_id = data.aws_caller_identity.current.account_id
   dns_suffix = data.aws_partition.current.dns_suffix
 }
 
 module "lambda_base" {
   source  = "andreswebs/lambda-base/aws"
-  version = "0.6.0"
+  version = "0.8.1"
   name    = var.name
 }
 
 module "lambda" {
   source  = "andreswebs/lambda/aws"
-  version = "0.0.1"
+  version = "0.0.4"
 
   name      = var.name
   image_uri = var.image_uri

@@ -1,0 +1,21 @@
+{
+  "servers": {
+    "aws-documentation": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      }
+    },
+    "terraform": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--interactive",
+        "--rm",
+        "hashicorp/terraform-mcp-server:0.4.0"
+      ]
+    }
+  }
+}
