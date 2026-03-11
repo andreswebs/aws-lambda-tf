@@ -3,7 +3,11 @@ locals {
 }
 
 data "aws_cloudfront_cache_policy" "default" {
-  name = "Managed-CachingOptimized"
+  name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_origin_request_policy" "default" {
+  name = "Managed-AllViewerExceptHostHeader"
 }
 
 resource "aws_cloudfront_origin_access_control" "this" {
@@ -38,10 +42,11 @@ resource "aws_cloudfront_distribution" "this" {
   # price_class     = "PriceClass_200" ## One of "PriceClass_All", "PriceClass_200", "PriceClass_100"
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
-    cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = var.name
-    cache_policy_id  = data.aws_cloudfront_cache_policy.default.id
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id         = var.name
+    cache_policy_id          = data.aws_cloudfront_cache_policy.default.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.default.id
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0

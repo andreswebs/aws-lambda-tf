@@ -5,6 +5,7 @@
   "author": "Andre Silva <andreswebs@pm.me>",
   "license": "Unlicense",
   "main": "dist/app.js",
+  "type": "module",
   "private": true,
   "engines": {
     "node": ">=24.x"

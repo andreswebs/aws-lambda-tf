@@ -43,3 +43,12 @@ resource "aws_lambda_permission" "cloudfront" {
   principal              = "cloudfront.${local.dns_suffix}"
   source_arn             = aws_cloudfront_distribution.this.arn
 }
+
+resource "aws_lambda_permission" "cloudfront_invoke" {
+  statement_id  = "AllowCloudFrontServicePrincipalInvokeFunction"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda.function.function_name
+  qualifier     = module.lambda.alias.name
+  principal     = "cloudfront.${local.dns_suffix}"
+  source_arn    = aws_cloudfront_distribution.this.arn
+}
