@@ -5,6 +5,7 @@ async function handler(event: LambdaFunctionURLEvent): Promise<LambdaFunctionURL
   console.log('Received request:', event.requestContext.http.method, event.rawPath);
 
   const identity = await getCallerIdentity();
+  console.log(JSON.stringify(identity));
 
   return {
     statusCode: 200,
@@ -13,9 +14,6 @@ async function handler(event: LambdaFunctionURLEvent): Promise<LambdaFunctionURL
     },
     body: JSON.stringify({
       message: 'OK',
-      callerIdentity: identity,
-      requestPath: event.rawPath,
-      method: event.requestContext.http.method,
     }),
   };
 }
